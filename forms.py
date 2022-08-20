@@ -1,7 +1,9 @@
+import re
 from datetime import datetime
+from typing import Optional
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL,Regexp,Optional,ValidationError
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -12,19 +14,19 @@ class ShowForm(Form):
     )
     start_time = DateTimeField(
         'start_time',
-        validators=[DataRequired()],
+        validators=[DataRequired(message="Input required, must be in the format DD/MM/YYYY,HH:MM:SS")],
         default= datetime.today()
     )
 
 class VenueForm(Form):
     name = StringField(
-        'name', validators=[DataRequired()]
+        'name', validators=[DataRequired(message="Input required, must be unique")]
     )
     city = StringField(
-        'city', validators=[DataRequired()]
+        'city', validators=[DataRequired(message="Input required")]
     )
     state = SelectField(
-        'state', validators=[DataRequired()],
+        'state', validators=[DataRequired(message="Input required")],
         choices=[
             ('AL', 'AL'),
             ('AK', 'AK'),
@@ -80,17 +82,17 @@ class VenueForm(Form):
         ]
     )
     address = StringField(
-        'address', validators=[DataRequired()]
+        'address', validators=[DataRequired(message="Input required")]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[DataRequired(message="Input required"),Regexp("\d{3}[-]\d{3}[-]\d{4}",flags=0,message="Invalid phone number. must be xxx-xxx-xxxx")]
     )
     image_link = StringField(
-        'image_link'
+        'image_link',validators=[Optional(),URL()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[DataRequired(message="Input required")],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -114,10 +116,10 @@ class VenueForm(Form):
         ]
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[Optional(), URL()]
     )
     website_link = StringField(
-        'website_link'
+        'website_link',validators=[Optional(),URL()]
     )
 
     seeking_talent = BooleanField( 'seeking_talent' )
@@ -130,13 +132,13 @@ class VenueForm(Form):
 
 class ArtistForm(Form):
     name = StringField(
-        'name', validators=[DataRequired()]
+        'name', validators=[DataRequired(message="Input required, must be unique")]
     )
     city = StringField(
-        'city', validators=[DataRequired()]
+        'city', validators=[DataRequired(message="Input required")]
     )
     state = SelectField(
-        'state', validators=[DataRequired()],
+        'state', validators=[DataRequired(message="Input required")],
         choices=[
             ('AL', 'AL'),
             ('AK', 'AK'),
@@ -193,13 +195,13 @@ class ArtistForm(Form):
     )
     phone = StringField(
         # TODO implement validation logic for phone 
-        'phone'
+        'phone',validators=[DataRequired(message="Input required"),Regexp("\d{3}[-]\d{3}[-]\d{4}",flags=0,message="Invalid phone number. must be xxx-xxx-xxxx")]
     )
     image_link = StringField(
-        'image_link'
+        'image_link',validators=[Optional(),URL()]
     )
     genres = SelectMultipleField(
-        'genres', validators=[DataRequired()],
+        'genres', validators=[DataRequired(message="Input required")],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -224,11 +226,11 @@ class ArtistForm(Form):
      )
     facebook_link = StringField(
         # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[Optional(), URL()]
      )
 
     website_link = StringField(
-        'website_link'
+        'website_link',validators=[Optional(),URL()]
      )
 
     seeking_venue = BooleanField( 'seeking_venue' )

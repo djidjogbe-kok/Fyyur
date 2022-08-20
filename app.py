@@ -148,7 +148,7 @@ def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
   venue = Venue.query.get(venue_id)
-  setattr(venue, "genres", venue.genres.split(",")) # convert genre string back to array
+  #setattr(venue, "genres", venue.genres.split(",")) # convert genre string back to array
 
   # get past shows
   past_shows = list(filter(lambda show: show.start_time < datetime.now(), venue.shows))
@@ -272,6 +272,7 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   form=VenueForm(request.form)
   if form.validate():
+  
 
     try:
       new_venue= Venue(
@@ -280,7 +281,7 @@ def create_venue_submission():
       state=form.state.data,
       address=form.address.data,
       phone=form.phone.data,
-      genres=",".join(form.genres.data),
+      genres=[].__add__(form.genres.data),
       facebook_link=form.facebook_link.data,
       image_link=form.image_link.data,
       website_link=form.website_link.data,
@@ -301,6 +302,7 @@ def create_venue_submission():
   else:
     print("\n\n", form.errors)
     flash('Venue ' + request.form['name'] + ' could not be listed.')
+    return redirect(url_for('create_venue_form'))
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
@@ -353,21 +355,22 @@ def search_artists():
     Artist.name.ilike(f"%{search_term}%") |
     Artist.city.ilike(f"%{search_term}%") |
     Artist.state.ilike(f"%{search_term}%") 
-
   ).all()
   response={
     "count":len(artists),
     "data":[]
   }
-  for artist in artists:
-    temp={}
-    temp["id"]=artist.id
-    temp["name"]=artist.name
-    upcoming_show=0
-    for show in artist.shows:
-      upcoming_show=upcoming_show+1
-  temp["upcoming_shows"]=upcoming_show
-  response["data"].append(temp)
+  if len(artists)>0:
+
+    for artist in artists:
+      temp={}
+      temp["id"]=artist.id
+      temp["name"]=artist.name
+      upcoming_show=0
+      for show in artist.shows:
+        upcoming_show=upcoming_show+1
+      temp["upcoming_shows"]=upcoming_show
+    response["data"].append(temp)
 
   '''response={
     "count": 1,
@@ -384,7 +387,7 @@ def show_artist(artist_id):
   # shows the artist page with the given artist_id
   # TODO: replace with real artist data from the artist table, using artist_id
   artist=Artist.query.get(artist_id)
-  setattr(artist,"genres",artist.genres.split(","))
+  #setattr(artist,"genres",artist.genres.split(","))
   #past show of the artist
   past_shows=list(filter(lambda show: show.start_time<datetime.now(), artist.shows))
   last_shows=[]
@@ -493,7 +496,16 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   form = ArtistForm()
   artist=Artist.query.get(artist_id)
-  form.genres.data=artist.genres.split(",")
+  form.name.data=artist.name
+  form.city.data=artist.city
+  form.state.data=artist.state
+  form.phone.data=artist.phone
+  form.genres.data=artist.genres
+  form.facebook_link.data=artist.facebook_link
+  form.image_link.data=artist.image_link
+  form.website_link.data=artist.website_link
+  form.seeking_venue.data=artist.seeking_venue
+  form.seeking_description.data=artist.seeking_description
   '''artist={
     "id": 4,
     "name": "Guns N Petals",
@@ -523,7 +535,7 @@ def edit_artist_submission(artist_id):
       artist.city=form.city.data
       artist.state=form.state.data
       artist.phone=form.phone.data
-      artist.genres=",".join(form.genres.data)
+      artist.genres=[].__add__(form.genres.data)
       artist.facebook_link=form.facebook_link.data
       artist.image_link=form.image_link.data
       artist.website_link=form.website_link.data
@@ -548,7 +560,17 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   form = VenueForm()
   venue=Venue.query.get(venue_id)
-  form.genres.data = venue.genres.split(",")
+  form.name.data=venue.name
+  form.city.data=venue.city
+  form.state.data=venue.state
+  form.address.data=venue.address
+  form.phone.data=venue.phone
+  form.genres.data=venue.genres
+  form.facebook_link.data=venue.facebook_link
+  form.image_link.data=venue.image_link
+  form.website_link.data=venue.website_link
+  form.seeking_talent.data=venue.seeking_talent
+  form.seeking_description.data=venue.seeking_description
   '''venue={
     "id": 1,
     "name": "The Musical Hop",
@@ -580,7 +602,7 @@ def edit_venue_submission(venue_id):
       venue.state=form.state.data
       venue.address=form.address.data
       venue.phone=form.phone.data
-      venue.genres=",".join(form.genres.data)
+      venue.genres=[].__add__(form.genres.data)
       venue.facebook_link=form.facebook_link.data
       venue.image_link=form.image_link.data
       venue.website_link=form.website_link.data
@@ -623,7 +645,7 @@ def create_artist_submission():
       city=form.city.data,
       state=form.state.data,
       phone=form.phone.data,
-      genres=",".join(form.genres.data),
+      genres=[].__add__(form.genres.data),
       facebook_link=form.facebook_link.data,
       image_link=form.image_link.data,
       website_link=form.website_link.data,
@@ -644,6 +666,7 @@ def create_artist_submission():
   else:
     print("\n\n",form.errors)
     flash('Artist ' + request.form['name'] + ' could not be listed.')
+    return redirect(url_for('create_artist_form'))
   # TODO: modify data to be the data object returned from db insertion
 
   return redirect(url_for('index'))
